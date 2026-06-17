@@ -18,6 +18,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '流程定义' }
   },
   {
+    path: '/process/modeler',
+    name: 'ProcessModeler',
+    component: () => import('@/views/process/ProcessModeler.vue'),
+    meta: { title: '流程编辑器' }
+  },
+  {
     path: '/process/instance',
     name: 'ProcessInstance',
     component: () => import('@/views/process/ProcessInstance.vue'),

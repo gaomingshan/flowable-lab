@@ -25,13 +25,14 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180">
+        <el-table-column label="操作" width="260">
           <template #default="{ row }">
             <el-button size="small" :type="row.suspended ? 'success' : 'warning'"
               @click="toggleSuspend(row)">
               {{ row.suspended ? '激活' : '挂起' }}
             </el-button>
             <el-button size="small" @click="showDiagram(row.id)">流程图</el-button>
+            <el-button size="small" type="primary" @click="editModel(row)">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -59,9 +60,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { getDefinitions, getDeployments, deleteDeployment, suspendDefinition, activateDefinition, getDiagram } from '@/api/process'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import FlowDiagram from '@/components/FlowDiagram.vue'
+
+const router = useRouter()
 
 const definitions = ref<any[]>([])
 const deployments = ref<any[]>([])
@@ -89,6 +93,18 @@ async function toggleSuspend(row: any) {
 function showDiagram(id: string) {
   diagramUrl.value = getDiagram(id)
   diagramVisible.value = true
+}
+
+function editModel(row: any) {
+  router.push({
+    path: '/process/modeler',
+    query: {
+      definitionId: row.id,
+      key: row.key,
+      version: row.version,
+      name: row.name
+    }
+  })
 }
 
 async function handleDelete(id: string) {

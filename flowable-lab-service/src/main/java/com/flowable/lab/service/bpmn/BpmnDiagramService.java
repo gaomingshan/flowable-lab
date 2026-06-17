@@ -64,7 +64,7 @@ public class BpmnDiagramService {
                 completedActivityIds, false);
     }
 
-    private void ensureGraphicInfo(BpmnModel model) {
+    public static void ensureGraphicInfo(BpmnModel model) {
         model.getLocationMap().clear();
         model.getFlowLocationMap().clear();
         int[] cursor = {50, 50};
@@ -75,7 +75,7 @@ public class BpmnDiagramService {
         }
     }
 
-    private void layoutFlowElements(BpmnModel model, Collection<FlowElement> flowElements, int[] cursor) {
+    private static void layoutFlowElements(BpmnModel model, Collection<FlowElement> flowElements, int[] cursor) {
         for (FlowElement element : flowElements) {
             if (element instanceof SequenceFlow) {
                 continue;

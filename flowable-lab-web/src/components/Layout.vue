@@ -22,6 +22,7 @@
             <span>流程管理</span>
           </template>
           <el-menu-item index="/process/definition">流程定义</el-menu-item>
+          <el-menu-item index="/process/modeler">流程编辑器</el-menu-item>
           <el-menu-item index="/process/instance">流程实例</el-menu-item>
         </el-sub-menu>
 

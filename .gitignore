@@ -1,0 +1,31 @@
+### IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+### Maven / Java
+target/
+*.class
+*.jar
+*.war
+*.zip
+*.tar.gz
+*.log
+
+### Node / Frontend
+flowable-lab-web/node_modules/
+flowable-lab-web/dist/
+flowable-lab-web/.vite/
+flowable-lab-web/*.local
+
+### OS
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+### Env
+.env.local
+.env.*.local

@@ -1,5 +1,7 @@
 package com.flowable.lab.service.bpmn;
 
+import org.flowable.bpmn.converter.BpmnXMLConverter;
+import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.DeploymentBuilder;
@@ -67,5 +69,14 @@ public class BpmnDeployService {
 
     public void deleteDeployment(String deploymentId) {
         repositoryService.deleteDeployment(deploymentId, true);
+    }
+
+    public String getProcessDefinitionXml(String processDefinitionId) {
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
+        if (bpmnModel == null) {
+            return null;
+        }
+        BpmnDiagramService.ensureGraphicInfo(bpmnModel);
+        return new String(new BpmnXMLConverter().convertToXML(bpmnModel, "UTF-8"));
     }
 }

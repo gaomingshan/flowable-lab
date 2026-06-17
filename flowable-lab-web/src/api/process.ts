@@ -69,3 +69,11 @@ export function getDiagram(definitionId: string) {
 export function getHighlightedDiagram(definitionId: string, instanceId: string) {
   return `/api/diagram/${definitionId}/${instanceId}`
 }
+
+export function getDefinitionXml(id: string) {
+  return request.get(`/bpmn/definition/${id}/xml`)
+}
+
+export function deployBpmn(name: string, bpmnXml: string) {
+  return request.post('/bpmn/definition/deploy', { name, bpmnXml })
+}

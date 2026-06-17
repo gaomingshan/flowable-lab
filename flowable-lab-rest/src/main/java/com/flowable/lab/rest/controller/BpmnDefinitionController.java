@@ -8,6 +8,7 @@ import com.flowable.lab.service.bpmn.BpmnDeployService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/bpmn/definition")
@@ -36,6 +37,12 @@ public class BpmnDefinitionController {
         return Result.success(mapper.toDto(bpmnDeployService.getProcessDefinitionByKey(key)));
     }
 
+    @GetMapping("/{id}/xml")
+    public Result<String> getXml(@PathVariable String id) {
+        String xml = bpmnDeployService.getProcessDefinitionXml(id);
+        return Result.success(xml);
+    }
+
     @PostMapping("/{id}/suspend")
     public Result<Void> suspend(@PathVariable String id) {
         bpmnDeployService.suspendProcessDefinition(id);
@@ -57,5 +64,20 @@ public class BpmnDefinitionController {
     public Result<Void> deleteDeployment(@PathVariable String id) {
         bpmnDeployService.deleteDeployment(id);
         return Result.success();
+    }
+
+    @PostMapping("/deploy")
+    public Result<Map<String, Object>> deploy(@RequestBody Map<String, String> body) {
+        String name = body.get("name");
+        String bpmnXml = body.get("bpmnXml");
+        if (name == null || bpmnXml == null) {
+            return Result.error(400, "name and bpmnXml required");
+        }
+        var deployment = bpmnDeployService.deploy(name, bpmnXml);
+        List<ProcessDefinitionDTO> definitions = mapper.toPdDtoList(bpmnDeployService.listProcessDefinitions());
+        return Result.success(Map.of(
+            "deploymentId", deployment.getId(),
+            "definitions", definitions
+        ));
     }
 }
