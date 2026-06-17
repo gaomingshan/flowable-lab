@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             typeLanguage="http://www.w3.org/2001/XMLSchema"
+             expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="http://flowable.org/bpmn">
+
+    <process id="leave" name="请假审批流程" isExecutable="true">
+
+        <startEvent id="startEvent"/>
+
+        <sequenceFlow id="flow1" sourceRef="startEvent" targetRef="submitTask"/>
+
+        <userTask id="submitTask" name="填写请假申请" flowable:assignee="${applicant}"/>
+
+        <sequenceFlow id="flow2" sourceRef="submitTask" targetRef="supervisorApproval"/>
+
+        <userTask id="supervisorApproval" name="直接主管审批" flowable:candidateGroups="manager"/>
+
+        <boundaryEvent id="timeoutBoundary" attachedToRef="supervisorApproval" cancelActivity="true">
+            <timerEventDefinition>
+                <timeDuration>PT48H</timeDuration>
+            </timerEventDefinition>
+        </boundaryEvent>
+
+        <sequenceFlow id="flow_timeout" sourceRef="timeoutBoundary" targetRef="escalationTask"/>
+
+        <userTask id="escalationTask" name="超时升级-总监处理" flowable:assignee="director"/>
+
+        <sequenceFlow id="flow_esc_join" sourceRef="escalationTask" targetRef="hrArchiveTask"/>
+
+        <sequenceFlow id="flow3" sourceRef="supervisorApproval" targetRef="daysGateway"/>
+
+        <exclusiveGateway id="daysGateway" name="天数判断"/>
+
+        <sequenceFlow id="flow4" sourceRef="daysGateway" targetRef="hrArchiveTask">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[${leaveDays <= 3}]]></conditionExpression>
+        </sequenceFlow>
+
+        <sequenceFlow id="flow5" sourceRef="daysGateway" targetRef="deptManagerApproval">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[${leaveDays > 3}]]></conditionExpression>
+        </sequenceFlow>
+
+        <userTask id="deptManagerApproval" name="部门经理审批" flowable:candidateGroups="manager"/>
+
+        <sequenceFlow id="flow6" sourceRef="deptManagerApproval" targetRef="hrArchiveTask"/>
+
+        <userTask id="hrArchiveTask" name="HR确认归档" flowable:candidateGroups="hr"/>
+
+        <sequenceFlow id="flow7" sourceRef="hrArchiveTask" targetRef="endEvent"/>
+
+        <endEvent id="endEvent"/>
+
+    </process>
+</definitions>

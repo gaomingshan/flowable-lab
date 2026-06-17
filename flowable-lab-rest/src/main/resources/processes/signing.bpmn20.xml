@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             typeLanguage="http://www.w3.org/2001/XMLSchema"
+             expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="http://flowable.org/bpmn">
+
+    <process id="signing" name="会签审批流程" isExecutable="true">
+
+        <startEvent id="startEvent"/>
+
+        <sequenceFlow id="flow1" sourceRef="startEvent" targetRef="submitTask"/>
+
+        <userTask id="submitTask" name="提交申请" flowable:assignee="${applicant}"/>
+
+        <sequenceFlow id="flow2" sourceRef="submitTask" targetRef="signTask"/>
+
+        <userTask id="signTask" name="多审批人会签" flowable:candidateGroups="manager">
+            <multiInstanceLoopCharacteristics isSequential="false"
+                                              flowable:collection="signUserList"
+                                              flowable:elementVariable="signUser">
+                <completionCondition>${nrOfCompletedInstances >= nrOfInstances / 2}</completionCondition>
+            </multiInstanceLoopCharacteristics>
+        </userTask>
+
+        <sequenceFlow id="flow3" sourceRef="signTask" targetRef="notifyTask"/>
+
+        <serviceTask id="notifyTask" name="通知申请人"
+                     flowable:delegateExpression="${sendEmailDelegate}"/>
+
+        <sequenceFlow id="flow4" sourceRef="notifyTask" targetRef="endEvent"/>
+
+        <endEvent id="endEvent"/>
+
+    </process>
+</definitions>

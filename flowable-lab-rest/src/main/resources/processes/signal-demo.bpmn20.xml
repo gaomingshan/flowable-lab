@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             typeLanguage="http://www.w3.org/2001/XMLSchema"
+             expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="http://flowable.org/bpmn">
+
+    <process id="signal-sender" name="信号发送流程" isExecutable="true">
+
+        <startEvent id="startEvent"/>
+
+        <sequenceFlow id="flow1" sourceRef="startEvent" targetRef="prepareTask"/>
+
+        <userTask id="prepareTask" name="准备数据" flowable:assignee="admin"/>
+
+        <sequenceFlow id="flow2" sourceRef="prepareTask" targetRef="throwSignal"/>
+
+        <intermediateThrowEvent id="throwSignal" name="抛出信号">
+            <signalEventDefinition signalRef="orderApprovedSignal"/>
+        </intermediateThrowEvent>
+
+        <sequenceFlow id="flow3" sourceRef="throwSignal" targetRef="logTask"/>
+
+        <serviceTask id="logTask" name="记录发送日志"
+                     flowable:delegateExpression="${logDelegate}"/>
+
+        <sequenceFlow id="flow4" sourceRef="logTask" targetRef="endEvent"/>
+
+        <endEvent id="endEvent"/>
+
+    </process>
+
+    <process id="signal-receiver" name="信号接收流程" isExecutable="true">
+
+        <startEvent id="catchStart">
+            <signalEventDefinition signalRef="orderApprovedSignal"/>
+        </startEvent>
+
+        <sequenceFlow id="rf1" sourceRef="catchStart" targetRef="processTask"/>
+
+        <userTask id="processTask" name="处理信号通知" flowable:assignee="admin"/>
+
+        <sequenceFlow id="rf2" sourceRef="processTask" targetRef="receiveEnd"/>
+
+        <endEvent id="receiveEnd"/>
+
+    </process>
+
+    <signal id="orderApprovedSignal" name="orderApprovedSignal"/>
+
+</definitions>

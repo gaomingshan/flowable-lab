@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             typeLanguage="http://www.w3.org/2001/XMLSchema"
+             expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="http://flowable.org/bpmn">
+
+    <process id="exception-demo" name="异常处理演示" isExecutable="true">
+
+        <startEvent id="startEvent"/>
+
+        <sequenceFlow id="flow1" sourceRef="startEvent" targetRef="riskyTask"/>
+
+        <serviceTask id="riskyTask" name="可能失败的操作"
+                     flowable:delegateExpression="${logDelegate}">
+            <extensionElements>
+                <flowable:field name="message">
+                    <flowable:string><![CDATA[执行 riskyTask]]></flowable:string>
+                </flowable:field>
+            </extensionElements>
+        </serviceTask>
+
+        <boundaryEvent id="errorBoundary" attachedToRef="riskyTask">
+            <errorEventDefinition errorRef="bizError"/>
+        </boundaryEvent>
+
+        <sequenceFlow id="flow2" sourceRef="riskyTask" targetRef="endEvent"/>
+        <sequenceFlow id="flow_error" sourceRef="errorBoundary" targetRef="errorSubProcess"/>
+
+        <subProcess id="errorSubProcess" name="异常处理子流程" triggeredByEvent="true">
+            <startEvent id="errorSubStart"/>
+            <sequenceFlow id="ef1" sourceRef="errorSubStart" targetRef="notifyTask"/>
+            <userTask id="notifyTask" name="通知管理员" flowable:assignee="admin"/>
+            <sequenceFlow id="ef2" sourceRef="notifyTask" targetRef="compensateTask"/>
+            <serviceTask id="compensateTask" name="补偿操作"
+                         flowable:delegateExpression="${logDelegate}">
+                <extensionElements>
+                    <flowable:field name="message">
+                        <flowable:string><![CDATA[执行补偿操作]]></flowable:string>
+                    </flowable:field>
+                </extensionElements>
+            </serviceTask>
+            <sequenceFlow id="ef3" sourceRef="compensateTask" targetRef="errorSubEnd"/>
+            <endEvent id="errorSubEnd"/>
+        </subProcess>
+
+        <endEvent id="endEvent"/>
+
+    </process>
+
+    <error id="bizError" errorCode="BIZ_ERROR"/>
+
+</definitions>
