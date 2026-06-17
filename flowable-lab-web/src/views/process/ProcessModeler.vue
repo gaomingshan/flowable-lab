@@ -405,10 +405,21 @@ function updateEdgeProps() {
   })
 }
 
+function normalizeBpmnXml(xml: string): string {
+  const bpmnNs = 'http://www.omg.org/spec/BPMN/20100524/MODEL'
+  if (xml.includes('xmlns="' + bpmnNs + '"')) {
+    xml = xml.replace('xmlns="' + bpmnNs + '"', 'xmlns:bpmn="' + bpmnNs + '"')
+    xml = xml.replace(/<(?!\/?bpmn:|bpmndi:|omgdc:|omgdi:|xsd:|xsi:|flowable:)(\w+)(\s|>)/g, '<bpmn:$1$2')
+    xml = xml.replace(/<\/(?!bpmn:|bpmndi:|omgdc:|omgdi:|xsd:|xsi:|flowable:)(\w+)>/g, '</bpmn:$1>')
+  }
+  return xml
+}
+
 async function loadAndRender(xml: string, meta?: { key: string; version: number; name: string }) {
   if (!lf || !bpmnAdapter) return
   try {
-    const graphData = bpmnAdapter.adapterXmlIn(xml)
+    const normalized = normalizeBpmnXml(xml)
+    const graphData = bpmnAdapter.adapterXmlIn(normalized)
     if (!graphData || (!graphData.nodes?.length && !graphData.edges?.length)) {
       ElMessage.warning('流程图为空或格式不支持')
       return
