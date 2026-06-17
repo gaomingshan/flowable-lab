@@ -252,6 +252,8 @@ function initModeler() {
   if (!canvasContainer.value) return
   destroyModeler()
 
+  LogicFlow.use(BpmnElement)
+
   lf = new LogicFlow({
     container: canvasContainer.value,
     grid: {
@@ -270,7 +272,6 @@ function initModeler() {
     },
   })
 
-  lf.use(BpmnElement)
 
   lf.on('node:click', ({ data }: any) => selectElement(data, 'node'))
   lf.on('edge:click', ({ data }: any) => selectElement(data, 'edge'))
@@ -283,6 +284,8 @@ function initModeler() {
   bpmnAdapter = new BpmnXmlAdapter({ lf })
   bpmnAdapter.definitionAttributes['-xmlns:flowable'] = 'http://flowable.org/bpmn'
   bpmnAdapter.definitionAttributes['-targetNamespace'] = 'http://flowable.org/bpmn'
+
+  lf.render({})
 
   lf.setTheme({
     rect: { stroke: '#409EFF', strokeWidth: 1.5, radius: 4 },
