@@ -16,6 +16,11 @@
             <groupId>com.flowable</groupId>
             <artifactId>flowable-lab-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.flowable</groupId>
+            <artifactId>flowable-lab-converter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.flowable</groupId>

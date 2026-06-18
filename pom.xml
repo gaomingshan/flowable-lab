@@ -20,6 +20,7 @@
 
     <modules>
         <module>flowable-lab-common</module>
+        <module>flowable-lab-converter</module>
         <module>flowable-lab-service</module>
         <module>flowable-lab-rest</module>
     </modules>
@@ -40,6 +41,11 @@
             <dependency>
                 <groupId>org.flowable</groupId>
                 <artifactId>flowable-spring-boot-starter-process</artifactId>
+                <version>${flowable.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.flowable</groupId>
+                <artifactId>flowable-bpmn-converter</artifactId>
                 <version>${flowable.version}</version>
             </dependency>
             <dependency>
