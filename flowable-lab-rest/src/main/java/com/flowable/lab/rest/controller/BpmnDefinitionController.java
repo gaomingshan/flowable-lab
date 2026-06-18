@@ -60,6 +60,15 @@ public class BpmnDefinitionController {
         return Result.success(mapper.toDeployDtoList(bpmnDeployService.listDeployments()));
     }
 
+    @DeleteMapping("/deployments")
+    public Result<Void> deleteAllDeployments() {
+        var deployments = bpmnDeployService.listDeployments();
+        for (var dep : deployments) {
+            bpmnDeployService.deleteDeployment(dep.getId());
+        }
+        return Result.success();
+    }
+
     @DeleteMapping("/deployments/{id}")
     public Result<Void> deleteDeployment(@PathVariable String id) {
         bpmnDeployService.deleteDeployment(id);
