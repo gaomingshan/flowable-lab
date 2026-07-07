@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: flowable-lab-backend
+  datasource:
+    url: jdbc:mysql://192.168.179.128:3306/flowable?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root_password
+  sql:
+    init:
+      mode: always
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+
+flowable:
+  async-executor-activate: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
