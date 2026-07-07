@@ -1,4 +1,5 @@
 import { http, type ApiResponse } from './http'
+import type { WorkflowGraph } from '../types/workflow-graph'
 
 export type WorkflowDefinitionRequest = {
   definitionKey: string
@@ -32,7 +33,7 @@ export type WorkflowVersion = {
 export type WorkflowGraphResponse = {
   definitionId: string
   versionNo: number
-  graph: Record<string, unknown>
+  graph: WorkflowGraph
   syncedNodes: number
   syncedEdges: number
 }
@@ -62,7 +63,7 @@ export async function getGraph(definitionId: string, versionNo: number) {
   return data.data
 }
 
-export async function saveGraph(definitionId: string, versionNo: number, graph: Record<string, unknown>) {
+export async function saveGraph(definitionId: string, versionNo: number, graph: WorkflowGraph) {
   const { data } = await http.put<ApiResponse<WorkflowGraphResponse>>(
     `/api/platform/workflow-definitions/${definitionId}/versions/${versionNo}/graph`,
     { graph },

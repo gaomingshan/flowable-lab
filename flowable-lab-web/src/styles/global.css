@@ -148,6 +148,142 @@ button {
   font-weight: 600;
 }
 
+.status-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.validation-text {
+  max-width: 420px;
+  color: #b45309;
+  text-align: right;
+  font-size: 13px;
+}
+
+.designer-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 320px;
+  gap: 16px;
+  min-height: 720px;
+}
+
+.designer-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.designer-canvas-panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.workflow-flow {
+  width: 100%;
+  height: 720px;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+.stencil-list {
+  display: grid;
+  gap: 10px;
+}
+
+.stencil-item {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.summary-item,
+.muted-text {
+  color: #475569;
+  font-size: 14px;
+}
+
+.raw-json-section {
+  min-height: 0;
+  flex: 1;
+}
+
+.small-code-block {
+  min-height: 240px;
+}
+
+.inline-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.danger-button {
+  background: #b91c1c;
+  color: #fff;
+}
+
+.wf-node {
+  min-width: 150px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #94a3b8;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  position: relative;
+}
+
+.wf-node-selected {
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.22), 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.wf-node-type {
+  color: #475569;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.wf-node-name {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.wf-node-key {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.wf-handle {
+  width: 10px;
+  height: 10px;
+  background: #2563eb;
+  border: 2px solid #fff;
+}
+
+.wf-node-startEvent {
+  border-color: #16a34a;
+}
+
+.wf-node-endEvent {
+  border-color: #dc2626;
+}
+
+.wf-node-userTask {
+  border-color: #2563eb;
+}
+
+.wf-node-exclusiveGateway,
+.wf-node-parallelGateway,
+.wf-node-parallelJoin {
+  border-color: #7c3aed;
+}
+
 @media (max-width: 960px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -166,5 +302,21 @@ button {
   .panel-meta {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .status-stack {
+    align-items: flex-start;
+  }
+
+  .validation-text {
+    text-align: left;
+  }
+
+  .designer-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .workflow-flow {
+    height: 560px;
   }
 }
