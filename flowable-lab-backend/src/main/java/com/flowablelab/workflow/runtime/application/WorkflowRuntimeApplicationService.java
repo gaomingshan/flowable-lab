@@ -1,5 +1,6 @@
 package com.flowablelab.workflow.runtime.application;
 
+import com.flowablelab.shared.api.CurrentUser;
 import com.flowablelab.workflow.definition.domain.entity.WfDefinitionVersionEntity;
 import com.flowablelab.workflow.definition.infrastructure.mapper.WfDefinitionVersionMapper;
 import com.flowablelab.workflow.flowable.application.WorkflowDeploymentApplicationService;
@@ -7,6 +8,7 @@ import com.flowablelab.workflow.runtime.api.dto.WorkflowInstanceStartResponse;
 import lombok.RequiredArgsConstructor;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.runtime.ProcessInstance;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
@@ -19,6 +21,7 @@ public class WorkflowRuntimeApplicationService {
     private final RuntimeService runtimeService;
     private final WorkflowDeploymentApplicationService workflowDeploymentApplicationService;
     private final WfDefinitionVersionMapper versionMapper;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public WorkflowInstanceStartResponse startWorkflow(String definitionId,
                                                        String businessKey,
@@ -40,6 +43,8 @@ public class WorkflowRuntimeApplicationService {
         if (variables != null) {
             runtimeVariables.putAll(variables);
         }
+        runtimeVariables.put("starterId", CurrentUser.USER_ID);
+        runtimeVariables.put("starterDeptId", CurrentUser.DEPT_ID);
         if (title != null && !title.isBlank()) {
             runtimeVariables.put("formTitle", title);
         }
@@ -49,6 +54,16 @@ public class WorkflowRuntimeApplicationService {
                 .businessKey(businessKey)
                 .variables(runtimeVariables)
                 .start();
+
+        applicationEventPublisher.publishEvent(new WorkflowInstanceStartedEvent(
+                processInstance.getProcessInstanceId(),
+                version.getProcessDefinitionId(),
+                processDefinitionKey,
+                businessKey,
+                CurrentUser.USER_ID,
+                CurrentUser.DEPT_ID,
+                title
+        ));
 
         return WorkflowInstanceStartResponse.builder()
                 .instanceId(processInstance.getProcessInstanceId())
@@ -61,5 +76,14 @@ public class WorkflowRuntimeApplicationService {
                 .processDefinitionId(version.getProcessDefinitionId())
                 .processDefinitionKey(processDefinitionKey)
                 .build();
+    }
+
+    public record WorkflowInstanceStartedEvent(String processInstanceId,
+                                               String processDefinitionId,
+                                               String processDefinitionKey,
+                                               String businessKey,
+                                               String starterId,
+                                               String starterDeptId,
+                                               String formTitle) {
     }
 }

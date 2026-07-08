@@ -148,6 +148,141 @@ button {
   font-weight: 600;
 }
 
+.task-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: end;
+}
+
+.task-filter {
+  min-width: 240px;
+}
+
+.task-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
+  gap: 16px;
+}
+
+.task-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.task-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 280px;
+}
+
+.task-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-column-header span {
+  min-width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.compact-list {
+  max-height: 360px;
+  overflow: auto;
+}
+
+.task-card,
+.instance-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #dbe3f0;
+  background: #f8fafc;
+  text-align: left;
+}
+
+.task-card strong,
+.instance-card strong {
+  color: #0f172a;
+}
+
+.task-card span,
+.instance-card span,
+.empty-hint,
+.empty-detail p {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.task-detail-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.task-detail-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detail-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-grid span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.detail-grid strong {
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.task-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.empty-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 220px;
+  justify-content: center;
+}
+
 .status-stack {
   display: flex;
   flex-direction: column;
@@ -314,6 +449,15 @@ button {
 
   .designer-layout {
     grid-template-columns: 1fr;
+  }
+
+  .task-toolbar,
+  .task-layout,
+  .task-columns,
+  .detail-grid,
+  .task-detail-header {
+    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
   .workflow-flow {

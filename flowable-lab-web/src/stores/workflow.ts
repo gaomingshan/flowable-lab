@@ -2,13 +2,23 @@ import { defineStore } from 'pinia'
 import {
   createDefinition,
   createVersion,
+  getTaskDetail,
+  claimTask,
+  completeTask,
   listDefinitions,
+  listDoneTasks,
+  listInitiatedInstances,
   listLaunchableWorkflows,
+  listTodoTasks,
+  listUnclaimedTasks,
   listVersions,
   releaseVersion,
   type WorkflowDefinition,
   type WorkflowDefinitionRequest,
   type LaunchableWorkflow,
+  type WorkflowInstanceSummary,
+  type WorkflowTaskDetail,
+  type WorkflowTaskSummary,
   type WorkflowVersion,
 } from '../api/workflow'
 
@@ -17,6 +27,11 @@ export const useWorkflowStore = defineStore('workflow', {
     definitions: [] as WorkflowDefinition[],
     launchable: [] as LaunchableWorkflow[],
     versions: {} as Record<string, WorkflowVersion[]>,
+    unclaimedTasks: [] as WorkflowTaskSummary[],
+    todoTasks: [] as WorkflowTaskSummary[],
+    doneTasks: [] as WorkflowTaskSummary[],
+    initiatedInstances: [] as WorkflowInstanceSummary[],
+    taskDetail: null as WorkflowTaskDetail | null,
     loading: false,
   }),
   actions: {
@@ -51,6 +66,38 @@ export const useWorkflowStore = defineStore('workflow', {
       const release = await releaseVersion(definitionId, versionNo, releaseComment)
       await Promise.all([this.fetchDefinitions(), this.fetchVersions(definitionId), this.fetchLaunchable()])
       return release
+    },
+    async fetchTaskWorkbench(userId?: string) {
+      const [unclaimed, todo, done, initiated] = await Promise.all([
+        listUnclaimedTasks(userId),
+        listTodoTasks(userId),
+        listDoneTasks(userId),
+        listInitiatedInstances(userId),
+      ])
+      this.unclaimedTasks = unclaimed
+      this.todoTasks = todo
+      this.doneTasks = done
+      this.initiatedInstances = initiated
+    },
+    async fetchTaskDetail(taskId: string) {
+      this.taskDetail = await getTaskDetail(taskId)
+      return this.taskDetail
+    },
+    async claimTask(taskId: string, userId?: string) {
+      const result = await claimTask(taskId, userId)
+      await this.fetchTaskWorkbench(userId)
+      if (this.taskDetail?.task.taskId === taskId) {
+        await this.fetchTaskDetail(taskId)
+      }
+      return result
+    },
+    async completeTask(taskId: string, userId?: string, variables?: Record<string, unknown>) {
+      const result = await completeTask(taskId, userId, variables)
+      await this.fetchTaskWorkbench(userId)
+      if (this.taskDetail?.task.taskId === taskId) {
+        this.taskDetail = null
+      }
+      return result
     },
   },
 })

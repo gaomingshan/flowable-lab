@@ -1,6 +1,9 @@
 package com.flowablelab.workflow.flowable.application;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flowablelab.workflow.definition.domain.entity.WfDefinitionEntity;
 import com.flowablelab.workflow.definition.domain.entity.WfDefinitionVersionEntity;
 import com.flowablelab.workflow.definition.domain.entity.WfEdgeEntity;
@@ -27,16 +30,20 @@ import org.springframework.stereotype.Service;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class WorkflowDeploymentApplicationService {
+
+    private static final TypeReference<LinkedHashMap<String, Object>> GRAPH_TYPE = new TypeReference<>() { };
 
     private final RepositoryService repositoryService;
     private final WfDefinitionMapper definitionMapper;
     private final WfDefinitionVersionMapper versionMapper;
     private final WfNodeMapper nodeMapper;
     private final WfEdgeMapper edgeMapper;
+    private final ObjectMapper objectMapper;
 
     public DeploymentResult deploy(String definitionId, Integer versionNo) {
         WfDefinitionEntity definition = requireDefinition(definitionId);
@@ -98,13 +105,14 @@ public class WorkflowDeploymentApplicationService {
         }
 
         Map<String, FlowElement> elementByNodeKey = new LinkedHashMap<>();
+        Map<String, Map<String, Object>> graphNodeMap = readGraphNodeMap(version.getGraphJson());
         Process process = new Process();
         process.setId(definition.getDefinitionKey());
         process.setName(definition.getDefinitionName());
         process.setExecutable(true);
 
         for (WfNodeEntity node : nodes) {
-            FlowElement element = toFlowElement(node);
+            FlowElement element = toFlowElement(node, graphNodeMap.get(node.getNodeKey()));
             process.addFlowElement(element);
             elementByNodeKey.put(node.getNodeKey(), element);
         }
@@ -132,11 +140,11 @@ public class WorkflowDeploymentApplicationService {
         return bpmnModel;
     }
 
-    private FlowElement toFlowElement(WfNodeEntity node) {
+    private FlowElement toFlowElement(WfNodeEntity node, Map<String, Object> graphNodeConfig) {
         return switch (node.getNodeType()) {
             case "startEvent" -> buildStartEvent(node);
             case "endEvent" -> buildEndEvent(node);
-            case "userTask" -> buildUserTask(node);
+            case "userTask" -> buildUserTask(node, graphNodeConfig);
             case "exclusiveGateway" -> buildExclusiveGateway(node);
             case "parallelGateway", "parallelJoin" -> buildParallelGateway(node);
             default -> throw new IllegalArgumentException("不支持的节点类型，无法发布到Flowable: " + node.getNodeType());
@@ -157,10 +165,23 @@ public class WorkflowDeploymentApplicationService {
         return event;
     }
 
-    private UserTask buildUserTask(WfNodeEntity node) {
+    private UserTask buildUserTask(WfNodeEntity node, Map<String, Object> graphNodeConfig) {
         UserTask task = new UserTask();
         task.setId(node.getNodeKey());
         task.setName(node.getNodeName());
+
+        if (graphNodeConfig != null) {
+            String assignee = asString(graphNodeConfig.get("assignee"));
+            if (assignee != null && !assignee.isBlank()) {
+                task.setAssignee(assignee);
+            }
+
+            List<String> candidateUsers = toStringList(graphNodeConfig.get("candidateUsers"));
+            if (!candidateUsers.isEmpty()) {
+                task.setCandidateUsers(candidateUsers);
+            }
+        }
+
         return task;
     }
 
@@ -233,6 +254,44 @@ public class WorkflowDeploymentApplicationService {
             throw new IllegalArgumentException("流程版本不存在: " + definitionId + " / " + versionNo);
         }
         return version;
+    }
+
+    private Map<String, Map<String, Object>> readGraphNodeMap(String graphJson) {
+        try {
+            Map<String, Object> graph = objectMapper.readValue(graphJson, GRAPH_TYPE);
+            Object nodes = graph.get("nodes");
+            if (!(nodes instanceof List<?> list)) {
+                return Map.of();
+            }
+            return list.stream()
+                    .filter(Map.class::isInstance)
+                    .map(item -> (Map<?, ?>) item)
+                    .map(this::normalizeMap)
+                    .filter(item -> item.get("nodeKey") != null)
+                    .collect(Collectors.toMap(item -> String.valueOf(item.get("nodeKey")), item -> item, (left, right) -> right, LinkedHashMap::new));
+        } catch (JsonProcessingException ex) {
+            throw new IllegalArgumentException("graph_json解析失败，无法发布", ex);
+        }
+    }
+
+    private Map<String, Object> normalizeMap(Map<?, ?> source) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        source.forEach((key, value) -> result.put(String.valueOf(key), value));
+        return result;
+    }
+
+    private List<String> toStringList(Object value) {
+        if (!(value instanceof List<?> list)) {
+            return List.of();
+        }
+        return list.stream()
+                .filter(item -> item != null && !String.valueOf(item).isBlank())
+                .map(String::valueOf)
+                .toList();
+    }
+
+    private String asString(Object value) {
+        return value == null ? null : String.valueOf(value).trim();
     }
 
     public record DeploymentResult(String deploymentId, String processDefinitionId, String processDefinitionKey, Integer processDefinitionVersion) {

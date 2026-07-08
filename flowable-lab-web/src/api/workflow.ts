@@ -46,6 +46,54 @@ export type LaunchableWorkflow = {
   latestReleasedVersion: number
 }
 
+export type WorkflowTaskSummary = {
+  taskId: string
+  taskName: string
+  taskDefinitionKey: string
+  processInstanceId: string
+  processDefinitionId: string
+  processDefinitionKey: string
+  businessKey?: string | null
+  assignee?: string | null
+  candidateUsers: string[]
+  candidateGroups: string[]
+  taskStatus: string
+  starterId?: string | null
+  starterDeptId?: string | null
+  formTitle?: string | null
+  createdAt?: string | null
+  completedAt?: string | null
+}
+
+export type WorkflowInstanceSummary = {
+  processInstanceId: string
+  processDefinitionId: string
+  processDefinitionKey: string
+  businessKey?: string | null
+  starterId?: string | null
+  starterDeptId?: string | null
+  formTitle?: string | null
+  status: string
+  startTime?: string | null
+  endTime?: string | null
+}
+
+export type WorkflowTaskDetail = {
+  task: WorkflowTaskSummary
+  instance: WorkflowInstanceSummary
+  variables: Record<string, unknown>
+  candidateUsers: string[]
+  candidateGroups: string[]
+}
+
+export type WorkflowTaskActionResponse = {
+  taskId: string
+  action: string
+  assignee?: string | null
+  processInstanceId: string
+  status: string
+}
+
 export async function listDefinitions() {
   const { data } = await http.get<ApiResponse<WorkflowDefinition[]>>('/api/platform/workflow-definitions')
   return data.data
@@ -96,5 +144,40 @@ export async function releaseVersion(definitionId: string, versionNo: number, re
 
 export async function listLaunchableWorkflows() {
   const { data } = await http.get<ApiResponse<LaunchableWorkflow[]>>('/api/platform/launchable-workflows')
+  return data.data
+}
+
+export async function listUnclaimedTasks(userId?: string) {
+  const { data } = await http.get<ApiResponse<WorkflowTaskSummary[]>>('/api/platform/query/unclaimed', { params: { userId } })
+  return data.data
+}
+
+export async function listTodoTasks(userId?: string) {
+  const { data } = await http.get<ApiResponse<WorkflowTaskSummary[]>>('/api/platform/query/todo', { params: { userId } })
+  return data.data
+}
+
+export async function listDoneTasks(userId?: string) {
+  const { data } = await http.get<ApiResponse<WorkflowTaskSummary[]>>('/api/platform/query/done', { params: { userId } })
+  return data.data
+}
+
+export async function listInitiatedInstances(userId?: string) {
+  const { data } = await http.get<ApiResponse<WorkflowInstanceSummary[]>>('/api/platform/query/initiated', { params: { userId } })
+  return data.data
+}
+
+export async function getTaskDetail(taskId: string) {
+  const { data } = await http.get<ApiResponse<WorkflowTaskDetail>>(`/api/platform/query/tasks/${taskId}`)
+  return data.data
+}
+
+export async function claimTask(taskId: string, userId?: string) {
+  const { data } = await http.post<ApiResponse<WorkflowTaskActionResponse>>('/api/platform/workflow-instances/claim', { taskId, userId })
+  return data.data
+}
+
+export async function completeTask(taskId: string, userId?: string, variables?: Record<string, unknown>) {
+  const { data } = await http.post<ApiResponse<WorkflowTaskActionResponse>>('/api/platform/workflow-instances/complete', { taskId, userId, variables })
   return data.data
 }

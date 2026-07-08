@@ -1,8 +1,13 @@
 package com.flowablelab.workflow.runtime.api;
 
 import com.flowablelab.shared.api.ApiResponse;
+import com.flowablelab.workflow.runtime.api.dto.ClaimTaskRequest;
+import com.flowablelab.workflow.runtime.api.dto.CompleteTaskRequest;
 import com.flowablelab.workflow.runtime.api.dto.WorkflowInstanceStartResponse;
+import com.flowablelab.workflow.runtime.api.dto.WorkflowTaskActionResponse;
 import com.flowablelab.workflow.runtime.application.WorkflowRuntimeApplicationService;
+import com.flowablelab.workflow.runtime.application.WorkflowTaskApplicationService;
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -19,6 +24,7 @@ import java.util.Map;
 public class WorkflowInstanceController {
 
     private final WorkflowRuntimeApplicationService workflowRuntimeApplicationService;
+    private final WorkflowTaskApplicationService workflowTaskApplicationService;
 
     @PostMapping
     public ApiResponse<WorkflowInstanceStartResponse> startWorkflow(@RequestBody StartWorkflowRequest request) {
@@ -28,6 +34,16 @@ public class WorkflowInstanceController {
                 request.getTitle(),
                 request.getVariables()
         ));
+    }
+
+    @PostMapping("/claim")
+    public ApiResponse<WorkflowTaskActionResponse> claimTask(@Valid @RequestBody ClaimTaskRequest request) {
+        return ApiResponse.success(workflowTaskApplicationService.claimTask(request.getTaskId(), request.getUserId()));
+    }
+
+    @PostMapping("/complete")
+    public ApiResponse<WorkflowTaskActionResponse> completeTask(@Valid @RequestBody CompleteTaskRequest request) {
+        return ApiResponse.success(workflowTaskApplicationService.completeTask(request.getTaskId(), request.getUserId(), request.getVariables()));
     }
 
     @Getter
