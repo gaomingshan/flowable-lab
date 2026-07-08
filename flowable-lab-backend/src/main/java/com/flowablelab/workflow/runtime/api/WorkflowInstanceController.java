@@ -1,7 +1,10 @@
 package com.flowablelab.workflow.runtime.api;
 
 import com.flowablelab.shared.api.ApiResponse;
+import com.flowablelab.workflow.runtime.api.dto.WorkflowInstanceStartResponse;
+import com.flowablelab.workflow.runtime.application.WorkflowRuntimeApplicationService;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,18 +15,18 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/platform/workflow-instances")
+@RequiredArgsConstructor
 public class WorkflowInstanceController {
 
+    private final WorkflowRuntimeApplicationService workflowRuntimeApplicationService;
+
     @PostMapping
-    public ApiResponse<Map<String, Object>> startWorkflow(@RequestBody StartWorkflowRequest request) {
-        return ApiResponse.success(Map.of(
-                "instanceId", "instance-1",
-                "engineProcessInstanceId", "engine-instance-1",
-                "currentNodeName", "开始",
-                "status", "running",
-                "definitionId", request.getDefinitionId(),
-                "businessKey", request.getBusinessKey(),
-                "title", request.getTitle()
+    public ApiResponse<WorkflowInstanceStartResponse> startWorkflow(@RequestBody StartWorkflowRequest request) {
+        return ApiResponse.success(workflowRuntimeApplicationService.startWorkflow(
+                request.getDefinitionId(),
+                request.getBusinessKey(),
+                request.getTitle(),
+                request.getVariables()
         ));
     }
 

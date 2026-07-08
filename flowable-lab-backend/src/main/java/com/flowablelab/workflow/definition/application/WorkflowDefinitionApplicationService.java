@@ -22,6 +22,7 @@ import com.flowablelab.workflow.definition.infrastructure.mapper.WfDefinitionMap
 import com.flowablelab.workflow.definition.infrastructure.mapper.WfDefinitionVersionMapper;
 import com.flowablelab.workflow.definition.infrastructure.mapper.WfEdgeMapper;
 import com.flowablelab.workflow.definition.infrastructure.mapper.WfNodeMapper;
+import com.flowablelab.workflow.flowable.application.WorkflowDeploymentApplicationService;
 import com.flowablelab.workflow.query.api.dto.LaunchableWorkflowResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,7 @@ public class WorkflowDefinitionApplicationService implements WorkflowDefinitionF
     private final WfNodeMapper nodeMapper;
     private final WfEdgeMapper edgeMapper;
     private final ObjectMapper objectMapper;
+    private final WorkflowDeploymentApplicationService workflowDeploymentApplicationService;
 
     @Override
     @Transactional
@@ -232,11 +234,12 @@ public class WorkflowDefinitionApplicationService implements WorkflowDefinitionF
         WfDefinitionEntity definition = requireDefinition(definitionId);
         WfDefinitionVersionEntity version = requireVersion(definitionId, versionNo);
         LocalDateTime now = LocalDateTime.now();
+        WorkflowDeploymentApplicationService.DeploymentResult deploymentResult = workflowDeploymentApplicationService.deploy(definitionId, versionNo);
 
         version.setStatus("released");
         version.setReleaseComment(releaseComment);
-        version.setDeploymentId("deployment-" + version.getId());
-        version.setProcessDefinitionId(definition.getDefinitionKey() + ":" + versionNo + ":" + version.getId());
+        version.setDeploymentId(deploymentResult.deploymentId());
+        version.setProcessDefinitionId(deploymentResult.processDefinitionId());
         version.setReleasedAt(now);
         version.setUpdatedBy(CurrentUser.USER_ID);
         version.setUpdatedAt(now);
