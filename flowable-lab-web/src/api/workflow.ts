@@ -94,6 +94,25 @@ export type WorkflowTaskActionResponse = {
   status: string
 }
 
+export type WorkflowInstanceStartPayload = {
+  definitionId: string
+  businessKey: string
+  title: string
+  variables?: Record<string, unknown>
+}
+
+export type WorkflowInstanceStartResponse = {
+  instanceId: string
+  engineProcessInstanceId: string
+  definitionId: string
+  versionNo: number
+  businessKey: string
+  title: string
+  status: string
+  processDefinitionId: string
+  processDefinitionKey: string
+}
+
 export async function listDefinitions() {
   const { data } = await http.get<ApiResponse<WorkflowDefinition[]>>('/api/platform/workflow-definitions')
   return data.data
@@ -179,5 +198,10 @@ export async function claimTask(taskId: string, userId?: string) {
 
 export async function completeTask(taskId: string, userId?: string, variables?: Record<string, unknown>) {
   const { data } = await http.post<ApiResponse<WorkflowTaskActionResponse>>('/api/platform/workflow-instances/complete', { taskId, userId, variables })
+  return data.data
+}
+
+export async function startWorkflow(payload: WorkflowInstanceStartPayload) {
+  const { data } = await http.post<ApiResponse<WorkflowInstanceStartResponse>>('/api/platform/workflow-instances', payload)
   return data.data
 }

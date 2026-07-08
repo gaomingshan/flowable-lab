@@ -6,6 +6,7 @@
         <RouterLink to="/definitions">流程定义</RouterLink>
         <RouterLink to="/designer">流程设计</RouterLink>
         <RouterLink to="/launchable">允许启动流程</RouterLink>
+        <RouterLink to="/demo">流程联调台</RouterLink>
         <RouterLink to="/tasks">我的任务</RouterLink>
       </nav>
     </aside>

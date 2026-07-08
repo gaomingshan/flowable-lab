@@ -159,6 +159,51 @@ button {
   min-width: 240px;
 }
 
+.demo-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.demo-start-panel,
+.demo-overview-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.overview-card,
+.demo-result-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #dbe3f0;
+}
+
+.overview-card strong,
+.demo-result-card strong {
+  color: #0f172a;
+}
+
+.overview-card span,
+.demo-result-card span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.demo-task-layout {
+  align-items: start;
+}
+
 .task-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
@@ -454,6 +499,7 @@ button {
   .task-toolbar,
   .task-layout,
   .task-columns,
+  .overview-grid,
   .detail-grid,
   .task-detail-header {
     grid-template-columns: 1fr;

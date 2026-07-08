@@ -13,8 +13,11 @@ import {
   listUnclaimedTasks,
   listVersions,
   releaseVersion,
+  startWorkflow,
   type WorkflowDefinition,
   type WorkflowDefinitionRequest,
+  type WorkflowInstanceStartPayload,
+  type WorkflowInstanceStartResponse,
   type LaunchableWorkflow,
   type WorkflowInstanceSummary,
   type WorkflowTaskDetail,
@@ -32,6 +35,7 @@ export const useWorkflowStore = defineStore('workflow', {
     doneTasks: [] as WorkflowTaskSummary[],
     initiatedInstances: [] as WorkflowInstanceSummary[],
     taskDetail: null as WorkflowTaskDetail | null,
+    latestStartedInstance: null as WorkflowInstanceStartResponse | null,
     loading: false,
   }),
   actions: {
@@ -97,6 +101,12 @@ export const useWorkflowStore = defineStore('workflow', {
       if (this.taskDetail?.task.taskId === taskId) {
         this.taskDetail = null
       }
+      return result
+    },
+    async startWorkflow(payload: WorkflowInstanceStartPayload, userId?: string) {
+      const result = await startWorkflow(payload)
+      this.latestStartedInstance = result
+      await this.fetchTaskWorkbench(userId)
       return result
     },
   },
